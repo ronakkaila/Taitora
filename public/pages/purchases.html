@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Purchases</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .modal {
+            z-index: 9000; /* Ensures the modal is below the dropdowns but above other content */
+        }
+        
+        .modal-content {
+            max-width: 600px;
+            padding: 20px;
+            position: relative;
+            cursor: move;
+            background: linear-gradient(145deg, #ffffff, #f5f5f5);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            cursor: move;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.8em;
+        }
+
+        #addPurchaseBtn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(4, 70, 6, 0.437);
+            margin-bottom: 20px;
+        }
+
+        #addPurchaseBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(4, 70, 6, 0.437);
+        }
+
+        #addPurchaseBtn i {
+            font-size: 18px;
+        }
+
+        #purchaseForm {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
+
+        #purchaseForm input,
+        #purchaseForm select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        #purchaseForm input:focus,
+        #purchaseForm select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        .button-group {
+            grid-column: span 2;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        #savePurchaseBtn {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        #savePurchaseBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        #cancelPurchaseBtn {
+            background: linear-gradient(145deg, #ff4444, #cc0000);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
+        }
+
+        #cancelPurchaseBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+        }
+
+        .close-btn {
+            background: linear-gradient(145deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
+        }
+
+        .close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+        }
+
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 1000;
+            animation: fadeOut 3s forwards;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 8px 12px;
+            margin: 0 4px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .delete-btn {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+        }
+
+        .edit-btn:hover, .delete-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateX(0); }
+            70% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(20px); }
+        }
+
+        /* Styles for multi-product form */
+        .additional-products-container {
+            margin-top: 15px;
+            border-top: 1px dashed #ccc;
+            padding-top: 15px;
+            grid-column: span 2;
+        }
+
+        .product-entry {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .product-entry .remove-product {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #addProductButton {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            grid-column: span 2;
+            justify-content: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        #addProductButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Styles for multi-product rows in table */
+        .multi-product-row {
+            position: relative;
+        }
+
+        .multi-product-row.first-product-row {
+            border-bottom: none;
+        }
+
+        .multi-product-row.additional-product-row {
+            border-top: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+
+        .dimmed-cell {
+            color: rgba(0, 0, 0, 0.5);
+            font-style: italic;
+        }
+        
+        /* Reduce table header font size */
+        #purchasesTable thead th {
+            font-size: 12px;
+            padding: 7px;
+        }
+        
+        /* Make header row stand out */
+        #purchasesTable thead tr {
+            background-color: #f8f8f8;
+        }
+        
+        /* Reduce spacing between table rows */
+        #purchasesTable tbody tr {
+            line-height: 1.2;
+        }
+        
+        #purchasesTable tbody td {
+            padding-top: 4px;
+            padding-bottom: 4px;
+        }
+
+        #currentFinancialYearDisplay {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 14px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo">
+            <span>Business</span>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="../pages/user-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="../pages/sales.html"><i class="fas fa-chart-line"></i> Sales</a></li>
+                <li><a href="../pages/purchases.html"><i class="fas fa-shopping-cart"></i> Purchases</a></li>
+                <li><a href="../pages/stock.html"><i class="fas fa-boxes"></i> Stock</a></li>
+                <li><a href="../pages/account.html"><i class="fas fa-user-circle"></i> Account</a></li>
+                <li><a href="../pages/products.html"><i class="fas fa-box"></i> Products</a></li>
+                <li><a href="../pages/transporters.html"><i class="fas fa-truck"></i> Transporters</a></li>
+                <li><a href="../pages/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </nav>
+        <button id="themeToggleBtn">Toggle Theme</button>
+    </header>
+
+    <div class="draggable-container" id="draggableContainer">
+        <div class="content">
+            <h1>Purchases Page</h1>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
+                <span id="currentFinancialYearDisplay">Financial Year</span>
+                
+                <button id="addPurchaseBtn" class="primary-btn">
+                    <i class="fas fa-plus"></i> Add Purchase
+                </button>
+            </div>
+            
+            <div id="purchaseModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add/Edit Purchase</h2>
+                        <button class="close-btn" id="closePurchaseModal">&times;</button>
+                    </div>
+                    <div id="purchaseForm">
+                        <input type="text" id="invoiceNo" placeholder="Invoice No.">
+                        <input type="date" id="purchaseDate" placeholder="Date">
+                        <input type="text" id="accountName" placeholder="Account Name">
+                        <input type="text" id="shipToAddress" placeholder="Ship To Address">
+                        <input type="text" id="productName" placeholder="Product Name">
+                        <input type="number" id="supplyQty" placeholder="Supply Cylinder Qty">
+                        <input type="number" id="receivedQty" placeholder="Received Cylinder Qty">
+                        <input type="text" id="transporterName" placeholder="Transporter Name">
+                        <input type="number" id="transporterFare" placeholder="Transporter Fare">
+                        <input type="text" id="container" placeholder="Container">
+                        <select id="paymentOption">
+                            <option value="cash">Cash</option>
+                            <option value="credit">Credit</option>
+                        </select>
+                        <button type="button" id="addProductButton">
+                            <i class="fas fa-plus"></i> Add Another Product
+                        </button>
+                        <div id="additionalProductsContainer" class="additional-products-container"></div>
+                        <div class="button-group">
+                            <button id="cancelPurchaseBtn">Cancel</button>
+                            <button id="savePurchaseBtn">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="purchasesTable">
+                    <thead>
+                        <tr>
+                            <th>Invoice No.</th>
+                            <th>Date</th>
+                            <th>Account Name</th>
+                            <th>Ship To Address</th>
+                            <th>Product Name</th>
+                            <th>Supply Qty</th>
+                            <th>Received Qty</th>
+                            <th>Transporter Name</th>
+                            <th>Fare</th>
+                            <th>Container</th>
+                            <th>Payment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Purchases will be listed here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="../auth.js"></script>
+    <script src="../common.js"></script>
+    <script src="purchases.js"></script>
+</body>
+</html> 

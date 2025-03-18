@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Ledger</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .ledger-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .ledger-table th, .ledger-table td {
+            padding: 6px 10px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+        .ledger-table th {
+            background: var(--header-bg);
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+        .ledger-table tr:hover {
+            background: var(--hover-bg);
+        }
+        .content {
+            padding: 5px;
+            padding-bottom: 60px; /* Space for bottom bar */
+        }
+        .totals-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: var(--primary-color);
+            color: white;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .totals-bar div {
+            font-weight: bold;
+        }
+        .product-info {
+            margin: 10px 0;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo">
+            <span>Business</span>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="../pages/user-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="../pages/sales.html"><i class="fas fa-chart-line"></i> Sales</a></li>
+                <li><a href="../pages/purchases.html"><i class="fas fa-shopping-cart"></i> Purchases</a></li>
+                <li><a href="../pages/stock.html"><i class="fas fa-boxes"></i> Stock</a></li>
+                <li><a href="../pages/account.html"><i class="fas fa-user-circle"></i> Account</a></li>
+                <li><a href="../pages/products.html"><i class="fas fa-box"></i> Products</a></li>
+                <li><a href="../pages/transporters.html"><i class="fas fa-truck"></i> Transporters</a></li>
+                <li><a href="../pages/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </nav>
+        <button id="themeToggleBtn">Toggle Theme</button>
+    </header>
+
+    <div class="draggable-container" id="draggableContainer">
+        <div class="content">
+            <div class="ledger-header">
+                <h1 id="productName">Product Ledger</h1>
+            </div>
+            
+            <div class="product-info">
+                <!-- Financial year display will be added here by JavaScript -->
+            </div>
+
+            <div class="table-container">
+                <table class="ledger-table" id="ledgerTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sales/Purchase</th>
+                            <th>Invoice No.</th>
+                            <th>Filled Received</th>
+                            <th>Filled Supplied</th>
+                            <th>Empty Received</th>
+                            <th>Empty Supplied</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerTableBody">
+                        <!-- Ledger data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="totals-bar" id="totalsBar">
+                <div>Total Filled Received: <span id="totalFilledReceived">0</span></div>
+                <div>Total Filled Supplied: <span id="totalFilledSupplied">0</span></div>
+                <div>Total Empty Received: <span id="totalEmptyReceived">0</span></div>
+                <div>Total Empty Supplied: <span id="totalEmptySupplied">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="product-ledger.js"></script>
+    <script>
+        // Add dragging functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('draggableContainer');
+            let isDragging = false;
+            let startX, startY, scrollLeft, scrollTop;
+
+            container.addEventListener('mousedown', (e) => {
+                if (e.target.closest('button, input, select, a, .table-container, .totals-bar')) return;
+                
+                isDragging = true;
+                container.classList.add('dragging');
+                startX = e.pageX - container.offsetLeft;
+                startY = e.pageY - container.offsetTop;
+                scrollLeft = container.scrollLeft;
+                scrollTop = container.scrollTop;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+
+                e.preventDefault();
+                const x = e.pageX - container.offsetLeft;
+                const y = e.pageY - container.offsetTop;
+                const walkX = (x - startX) * 2;
+                const walkY = (y - startY) * 2;
+                container.scrollLeft = scrollLeft - walkX;
+                container.scrollTop = scrollTop - walkY;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                container.classList.remove('dragging');
+            });
+        });
+    </script>
+    <script src="../auth.js"></script>
+    <script src="../common.js"></script>
+</body>
+</html> 

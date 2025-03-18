@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo">
+            <span>Business</span>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="../pages/user-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="../pages/sales.html"><i class="fas fa-chart-line"></i> Sales</a></li>
+                <li><a href="../pages/purchases.html"><i class="fas fa-shopping-cart"></i> Purchases</a></li>
+                <li><a href="../pages/stock.html"><i class="fas fa-boxes"></i> Stock</a></li>
+                <li><a href="../pages/account.html"><i class="fas fa-user-circle"></i> Account</a></li>
+                <li><a href="../pages/products.html"><i class="fas fa-box"></i> Products</a></li>
+                <li><a href="../pages/transporters.html"><i class="fas fa-truck"></i> Transporters</a></li>
+                <li><a href="../pages/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </nav>
+        <button id="themeToggleBtn">Toggle Theme</button>
+    </header>
+
+    <div class="draggable-container" id="draggableContainer">
+        <div class="content">
+            <h1>Products Page</h1>
+            
+            <button id="addProductBtn">
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+            
+            <div id="productModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add/Edit Product</h2>
+                        <button class="close-btn" id="closeProductModal">&times;</button>
+                    </div>
+                    <div id="productForm">
+                        <input type="text" id="productName" placeholder="Product Name">
+                        <textarea id="productDescription" placeholder="Product Description"></textarea>
+                        <input type="number" id="productOpeningStock" placeholder="Opening Stock">
+                        <div class="button-container">
+                            <button id="cancelProductBtn" class="btn btn-cancel">Cancel</button>
+                            <button id="saveProductBtn" class="btn btn-save">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <table id="productTable">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Description</th>
+                        <th>Opening Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Products will be listed here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="products.js"></script>
+    <script src="../auth.js"></script>
+    <script src="../common.js"></script>
+</body>
+</html> 

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Account</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo">
+            <span>Business</span>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="../pages/user-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="../pages/sales.html"><i class="fas fa-chart-line"></i> Sales</a></li>
+                <li><a href="../pages/purchases.html"><i class="fas fa-shopping-cart"></i> Purchases</a></li>
+                <li><a href="../pages/stock.html"><i class="fas fa-boxes"></i> Stock</a></li>
+                <li><a href="../pages/account.html" class="active"><i class="fas fa-user-circle"></i> Account</a></li>
+                <li><a href="../pages/products.html"><i class="fas fa-box"></i> Products</a></li>
+                <li><a href="../pages/transporters.html"><i class="fas fa-truck"></i> Transporters</a></li>
+                <li><a href="../pages/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </nav>
+        <button id="themeToggleBtn">Toggle Theme</button>
+    </header>
+
+    <div class="draggable-container" id="draggableContainer">
+        <div class="content">
+            <h1>Account Management</h1>
+            
+            <button id="addAccountBtn" class="btn-save">
+                <i class="fas fa-plus"></i> Add Account
+            </button>
+            
+            <div id="accountModal" class="modal">
+                <div class="modal-content draggable-area">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-user-plus"></i> Add/Edit Account</h2>
+                        <button class="close-btn" id="closeAccountModal">&times;</button>
+                    </div>
+                    <div id="accountForm">
+                        <div class="form-group">
+                            <label for="customerName"><i class="fas fa-user"></i> Customer Name</label>
+                            <input type="text" id="customerName" placeholder="Enter customer name">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerAddress"><i class="fas fa-map-marker-alt"></i> Address</label>
+                            <input type="text" id="customerAddress" placeholder="Enter address">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerMobile"><i class="fas fa-phone"></i> Mobile Number</label>
+                            <input type="text" id="customerMobile" placeholder="Enter mobile number">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerEmail"><i class="fas fa-envelope"></i> Email</label>
+                            <input type="email" id="customerEmail" placeholder="Enter email">
+                        </div>
+                        <div class="button-container">
+                            <button id="cancelAccountBtn" class="btn btn-cancel">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            <button id="saveAccountBtn" class="btn btn-save">
+                                <i class="fas fa-check"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table id="accountTable">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Address</th>
+                                <th>Mobile Number</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Accounts will be listed here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="account.js"></script>
+    <script src="../auth.js"></script>
+    <script src="../common.js"></script>
+</body>
+</html> 

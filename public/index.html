@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Business Management App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="redirect.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-container {
+            max-width: 400px;
+            width: 90%;
+            margin: 20px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #4a4a4a;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 0;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 45px 15px 20px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            background: white;
+            color: #333;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .form-group i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus + i {
+            color: #667eea;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .form-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .form-footer a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #ffe5e5;
+            color: #ff4444;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            display: none;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #e5ffe5;
+            color: #44aa44;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            display: none;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 15px 0;
+            color: #667eea;
+        }
+
+        .loading i {
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #4a4a4a;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .modal-description {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #ff4444;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+
+            .form-group input {
+                font-size: 14px;
+                padding: 12px 40px 12px 15px;
+            }
+        }
+
+        .credentials-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: none;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(74, 144, 226, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .option-btn i {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .option-btn span {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .option-btn p {
+            font-size: 14px;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .verify-section {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Welcome Back</h1>
+            <p>Login to access your business dashboard</p>
+        </div>
+        
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" required>
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <span>Login</span>
+            </button>
+
+            <div class="form-footer">
+                <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+                <a href="/signup.html">Don't have an account? Sign Up</a>
+            </div>
+        </form>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner"></i> Processing...
+        </div>
+    </div>
+
+    <!-- Credentials Modal -->
+    <div id="credentialsModal" class="modal" style="display: none">
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="modal" style="display: none">
+    </div>
+
+    <!-- Forgot Username Modal -->
+    <div id="forgotUsernameModal" class="modal" style="display: none">
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" id="closeForgotPasswordModal">&times;</span>
+            <div class="modal-header">
+                <h2>Forgot Password</h2>
+                <p class="modal-description">Enter your username or email to reset your password</p>
+            </div>
+            
+            <div id="resetStep1">
+                <div class="form-group">
+                    <input type="text" id="resetIdentifier" placeholder="Username or Email" required>
+                    <i class="fas fa-user"></i>
+                </div>
+                <button id="sendResetLinkBtn" class="submit-btn">
+                    <span>Send OTP</span>
+                </button>
+            </div>
+
+            <div id="resetStep2" style="display: none;">
+                <div class="form-group">
+                    <input type="text" id="otpInput" placeholder="Enter OTP" maxlength="6" required>
+                    <i class="fas fa-key"></i>
+                </div>
+                <button id="verifyOtpBtn" class="submit-btn">
+                    <span>Verify OTP</span>
+                </button>
+            </div>
+
+            <div id="resetStep3" style="display: none;">
+                <div class="form-group">
+                    <input type="password" id="newPassword" placeholder="New Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <button id="resetPasswordBtn" class="submit-btn">
+                    <span>Reset Password</span>
+                </button>
+            </div>
+            
+            <div id="modalErrorMessage" class="error-message"></div>
+            <div id="modalSuccessMessage" class="success-message"></div>
+            <div id="modalLoading" class="loading">
+                <i class="fas fa-spinner"></i> Processing...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show the forgot password modal when clicking the forgot password link
+        document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('forgotPasswordModal').style.display = 'block';
+        });
+
+        // Close the forgot password modal when clicking the close button
+        document.getElementById('closeForgotPasswordModal').addEventListener('click', function() {
+            document.getElementById('forgotPasswordModal').style.display = 'none';
+            // Reset the form state
+            document.getElementById('resetStep1').style.display = 'block';
+            document.getElementById('resetStep2').style.display = 'none';
+            document.getElementById('resetStep3').style.display = 'none';
+            document.getElementById('resetIdentifier').value = '';
+            document.getElementById('otpInput').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('modalErrorMessage').style.display = 'none';
+            document.getElementById('modalSuccessMessage').style.display = 'none';
+            // Clear stored reset data
+            localStorage.removeItem('resetIdentifier');
+            localStorage.removeItem('verifiedOtp');
+        });
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('forgotPasswordModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                // Reset the form state
+                document.getElementById('resetStep1').style.display = 'block';
+                document.getElementById('resetStep2').style.display = 'none';
+                document.getElementById('resetStep3').style.display = 'none';
+                document.getElementById('resetIdentifier').value = '';
+                document.getElementById('otpInput').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                document.getElementById('modalErrorMessage').style.display = 'none';
+                document.getElementById('modalSuccessMessage').style.display = 'none';
+                // Clear stored reset data
+                localStorage.removeItem('resetIdentifier');
+                localStorage.removeItem('verifiedOtp');
+            }
+        });
+
+        // Handle send reset link button click
+        document.getElementById('sendResetLinkBtn').addEventListener('click', async function() {
+            const identifier = document.getElementById('resetIdentifier').value.trim();
+            const modalError = document.getElementById('modalErrorMessage');
+            const modalSuccess = document.getElementById('modalSuccessMessage');
+            const modalLoading = document.getElementById('modalLoading');
+            
+            modalError.style.display = 'none';
+            modalSuccess.style.display = 'none';
+            
+            if (!identifier) {
+                modalError.textContent = 'Please enter your username or email';
+                modalError.style.display = 'block';
+                return;
+            }
+            
+            modalLoading.style.display = 'block';
+            this.disabled = true;
+            
+            try {
+                const response = await fetch('/api/request-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ identifier })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    modalSuccess.textContent = 'OTP sent successfully! Please check your email.';
+                    modalSuccess.style.display = 'block';
+                    
+                    // Store identifier for the next step
+                    localStorage.setItem('resetIdentifier', identifier);
+                    
+                    // Show step 2 (OTP verification)
+                    document.getElementById('resetStep1').style.display = 'none';
+                    document.getElementById('resetStep2').style.display = 'block';
+                } else {
+                    modalError.textContent = data.error || 'Failed to send OTP. Please try again.';
+                    modalError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Request OTP error:', error);
+                modalError.textContent = 'An error occurred. Please try again later.';
+                modalError.style.display = 'block';
+            } finally {
+                modalLoading.style.display = 'none';
+                this.disabled = false;
+            }
+        });
+
+        // Handle verify OTP button click
+        document.getElementById('verifyOtpBtn').addEventListener('click', async function() {
+            const otp = document.getElementById('otpInput').value.trim();
+            const identifier = localStorage.getItem('resetIdentifier');
+            const modalError = document.getElementById('modalErrorMessage');
+            const modalSuccess = document.getElementById('modalSuccessMessage');
+            const modalLoading = document.getElementById('modalLoading');
+            
+            modalError.style.display = 'none';
+            modalSuccess.style.display = 'none';
+            
+            if (!otp) {
+                modalError.textContent = 'Please enter the OTP sent to your email';
+                modalError.style.display = 'block';
+                return;
+            }
+            
+            modalLoading.style.display = 'block';
+            this.disabled = true;
+            
+            try {
+                const response = await fetch('/api/verify-otp-only', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        identifier,
+                        otp
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    modalSuccess.textContent = 'OTP verified successfully! You can now set your new password.';
+                    modalSuccess.style.display = 'block';
+                    
+                    // Save the verified OTP for the final step
+                    localStorage.setItem('verifiedOtp', otp);
+                    
+                    // Show step 3 (set new password)
+                    document.getElementById('resetStep2').style.display = 'none';
+                    document.getElementById('resetStep3').style.display = 'block';
+                } else {
+                    modalError.textContent = data.error || 'Invalid OTP. Please try again.';
+                    modalError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Verify OTP error:', error);
+                modalError.textContent = 'An error occurred. Please try again later.';
+                modalError.style.display = 'block';
+            } finally {
+                modalLoading.style.display = 'none';
+                this.disabled = false;
+            }
+        });
+
+        // Handle reset password button click
+        document.getElementById('resetPasswordBtn').addEventListener('click', async function() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const identifier = localStorage.getItem('resetIdentifier');
+            const otp = localStorage.getItem('verifiedOtp');
+            const modalError = document.getElementById('modalErrorMessage');
+            const modalSuccess = document.getElementById('modalSuccessMessage');
+            const modalLoading = document.getElementById('modalLoading');
+            
+            modalError.style.display = 'none';
+            modalSuccess.style.display = 'none';
+            
+            // Validation
+            if (!newPassword) {
+                modalError.textContent = 'Please enter a new password';
+                modalError.style.display = 'block';
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                modalError.textContent = 'Passwords do not match';
+                modalError.style.display = 'block';
+                return;
+            }
+            
+            // Password strength validation
+            const hasMinLength = newPassword.length >= 8;
+            const hasUpperCase = /[A-Z]/.test(newPassword);
+            const hasLowerCase = /[a-z]/.test(newPassword);
+            const hasNumber = /[0-9]/.test(newPassword);
+            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+            
+            if (!(hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar)) {
+                modalError.textContent = 'Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.';
+                modalError.style.display = 'block';
+                return;
+            }
+            
+            modalLoading.style.display = 'block';
+            this.disabled = true;
+            
+            try {
+                const response = await fetch('/api/reset-password-with-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        identifier,
+                        otp,
+                        newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    modalSuccess.textContent = 'Password reset successful! You can now log in with your new password.';
+                    modalSuccess.style.display = 'block';
+                    
+                    // Clear stored data
+                    localStorage.removeItem('resetIdentifier');
+                    localStorage.removeItem('verifiedOtp');
+                    
+                    // Close the modal after a delay
+                    setTimeout(() => {
+                        document.getElementById('forgotPasswordModal').style.display = 'none';
+                        // Reset the modal state for future use
+                        document.getElementById('resetStep1').style.display = 'block';
+                        document.getElementById('resetStep2').style.display = 'none';
+                        document.getElementById('resetStep3').style.display = 'none';
+                        document.getElementById('resetIdentifier').value = '';
+                        document.getElementById('otpInput').value = '';
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                    }, 3000);
+                } else {
+                    modalError.textContent = data.error || 'Failed to reset password. Please try again.';
+                    modalError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Reset password error:', error);
+                modalError.textContent = 'An error occurred. Please try again later.';
+                modalError.style.display = 'block';
+            } finally {
+                modalLoading.style.display = 'none';
+                this.disabled = false;
+            }
+        });
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const loadingElement = document.getElementById('loading');
+            
+            // Hide any previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                errorMessage.textContent = 'Please enter both username and password';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Show loading state
+            loadingElement.style.display = 'block';
+            document.querySelector('.submit-btn').disabled = true;
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store user data in localStorage
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Redirect to dashboard using the redirectTo property from server
+                    window.location.href = data.redirectTo || '/pages/user-dashboard.html';
+                } else {
+                    errorMessage.textContent = data.error || 'Login failed';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'An error occurred during login. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Hide loading state
+                loadingElement.style.display = 'none';
+                document.querySelector('.submit-btn').disabled = false;
+            }
+        }
+
+        // Immediate check on page load (before DOMContentLoaded)
+        (function() {
+            // Check if user is already logged in
+            const user = localStorage.getItem('user');
+            if (user) {
+                // Try to verify with the server
+                fetch('/api/user/profile')
+                    .then(response => {
+                        if (response.ok) {
+                            // Valid session, redirect to dashboard
+                            window.location.href = '/pages/user-dashboard.html';
+                        } else {
+                            // Invalid session, clear localStorage
+                            localStorage.removeItem('user');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error checking auth status:', err);
+                    });
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if redirected from registration
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('registered') === 'true') {
+                const successMessage = document.getElementById('successMessage');
+                successMessage.textContent = 'Registration successful! Please log in with your credentials.';
+                successMessage.style.display = 'block';
+            }
+        });
+    </script>
+    <script src="auth.js"></script>
+    <script src="responsive.js"></script>
+</body>
+</html> 

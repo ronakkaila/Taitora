@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transporters</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .success-message.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .success-message.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 5px 10px;
+            margin: 0 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .modal textarea {
+            width: 100%;
+            min-height: 100px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        /* New table styling */
+        #transportersTable {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background: var(--background-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #transportersTable th,
+        #transportersTable td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #transportersTable th {
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        #transportersTable tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        #transportersTable tbody tr:hover {
+            background-color: var(--background-hover);
+        }
+
+        #transportersTable td {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* Add vertical spacing between rows */
+        #transportersTable tbody tr:not(:last-child) td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Style for the mobile column */
+        #transportersTable td:nth-child(2) {
+            font-family: monospace;
+            font-size: 1em;
+        }
+
+        /* Style for the details column */
+        #transportersTable td:nth-child(4) {
+            max-width: 300px;
+            white-space: pre-wrap;
+            color: var(--text-secondary);
+        }
+
+        /* Style for the actions column */
+        #transportersTable td:last-child {
+            text-align: center;
+            min-width: 120px;
+        }
+
+        /* Add some spacing to the Add Transporter button */
+        #addTransporterBtn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #addTransporterBtn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo">
+            <span>Business</span>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="../pages/user-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="../pages/sales.html"><i class="fas fa-chart-line"></i> Sales</a></li>
+                <li><a href="../pages/purchases.html"><i class="fas fa-shopping-cart"></i> Purchases</a></li>
+                <li><a href="../pages/stock.html"><i class="fas fa-boxes"></i> Stock</a></li>
+                <li><a href="../pages/account.html"><i class="fas fa-user-circle"></i> Account</a></li>
+                <li><a href="../pages/products.html"><i class="fas fa-box"></i> Products</a></li>
+                <li><a href="../pages/transporters.html" class="active"><i class="fas fa-truck"></i> Transporters</a></li>
+                <li><a href="../pages/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </nav>
+        <button id="themeToggleBtn">Toggle Theme</button>
+    </header>
+
+    <div class="draggable-container" id="draggableContainer">
+        <div class="content">
+            <h1>Transporters</h1>
+            
+            <button id="addTransporterBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Transporter
+            </button>
+            
+            <div id="transporterModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add/Edit Transporter</h2>
+                        <button class="close-btn" id="closeTransporterModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="transporterName">Transporter Name *</label>
+                            <input type="text" id="transporterName" placeholder="Enter transporter name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transporterMobile">Mobile Number</label>
+                            <input type="tel" id="transporterMobile" placeholder="Enter mobile number">
+                        </div>
+                        <div class="form-group">
+                            <label for="transporterAddress">Address</label>
+                            <input type="text" id="transporterAddress" placeholder="Enter address">
+                        </div>
+                        <div class="form-group">
+                            <label for="transporterDetails">Additional Details</label>
+                            <textarea id="transporterDetails" placeholder="Enter additional details"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="cancelTransporterBtn" class="btn">Cancel</button>
+                        <button id="saveTransporterBtn" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="transportersTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Address</th>
+                            <th>Details</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Transporters will be listed here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="../auth.js"></script>
+    <script src="../common.js"></script>
+    <script src="transporters.js"></script>
+</body>
+</html> 
