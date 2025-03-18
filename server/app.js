@@ -26,6 +26,9 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy (needed for Render deployment)
+app.set('trust proxy', 1);
+
 // Add rate limiting
 const apiLimiter = rateLimit({
     windowMs: (parseInt(process.env.RATE_LIMIT_WINDOW) || 15) * 60 * 1000, // Default 15 minutes in milliseconds
