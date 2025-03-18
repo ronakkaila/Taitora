@@ -281,7 +281,7 @@ app.post('/api/register', (req, res) => {
             }
             
             // Hash the password with bcrypt
-            const bcrypt = require('bcrypt');
+            const bcrypt = require('bcryptjs');
             bcrypt.hash(password, 10, (err, hashedPassword) => {
                 if (err) {
                     authDb.run('ROLLBACK');
@@ -366,7 +366,7 @@ app.post('/api/login', (req, res) => {
         }
         
         // Now check the password using bcrypt
-        const bcrypt = require('bcrypt');
+        const bcrypt = require('bcryptjs');
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
                 console.error('Password comparison error:', err);
@@ -2835,7 +2835,7 @@ app.post('/api/verify-otp', (req, res) => {
         console.log(`Valid OTP for user ${user.username}, updating password`);
         
         // Hash the new password with bcrypt
-        const bcrypt = require('bcrypt');
+        const bcrypt = require('bcryptjs');
         bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
             if (err) {
                 console.error('Password hashing error:', err);
@@ -3668,7 +3668,7 @@ app.post('/api/reset-password-with-otp', (req, res) => {
         console.log(`Valid OTP for password reset for user ${user.username}, updating password`);
         
         // Hash the new password with bcrypt
-        const bcrypt = require('bcrypt');
+        const bcrypt = require('bcryptjs');
         bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
             if (err) {
                 console.error('Password hashing error:', err);

@@ -8,10 +8,10 @@
     "dev": "nodemon --inspect server/app.js",
     "debug": "node --inspect-brk server/app.js",
     "generate-secret": "node scripts/generate-secret.js",
-    "postinstall": "npm rebuild sqlite3 --build-from-source && npm rebuild bcrypt --build-from-source"
+    "postinstall": "npm rebuild sqlite3 --build-from-source"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "connect-sqlite3": "^0.9.15",
     "dotenv": "^16.4.7",
     "express": "^4.17.1",
