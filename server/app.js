@@ -2384,13 +2384,13 @@ app.get('/api/backup', isAuthenticated, (req, res) => {
             return res.status(500).json({ error: 'Database error occurred' });
         }
         
-        if (!row || !row.user_dir) {
+        if (!row) {
             return res.status(404).json({ error: 'User database not found' });
         }
         
-        const userDir = row.user_dir;
+        // Create a standardized backup
         const fileName = `backup_${username}_${new Date().toISOString().split('T')[0]}.db`;
-        const backupPath = process.env.BACKUP_DIR || path.join(__dirname, 'temp_backups');
+        const backupPath = path.join(__dirname, 'temp_backups');
 
         // Create temp directory if it doesn't exist
         if (!fs.existsSync(backupPath)) {
@@ -2398,6 +2398,7 @@ app.get('/api/backup', isAuthenticated, (req, res) => {
         }
 
         const tempBackupFile = path.join(backupPath, fileName);
+        console.log(`Creating backup at ${tempBackupFile}`);
 
         // Get all user databases first
         getAllUserDatabases(username)
@@ -2419,22 +2420,28 @@ app.get('/api/backup', isAuthenticated, (req, res) => {
                 res.download(tempBackupFile, fileName, (err) => {
                     if (err) {
                         console.error('Error downloading backup:', err);
-                        // Headers may have already been sent
+                        // Don't try to send response here as headers might have been sent
                     }
                     
                     // Delete the temporary file after download (with a delay to ensure download completes)
                     setTimeout(() => {
-                        fs.unlink(tempBackupFile, (unlinkErr) => {
-                            if (unlinkErr) {
-                                console.error('Error deleting temporary backup file:', unlinkErr);
+                        try {
+                            if (fs.existsSync(tempBackupFile)) {
+                                fs.unlinkSync(tempBackupFile);
+                                console.log(`Deleted temporary backup file: ${tempBackupFile}`);
                             }
-                        });
+                        } catch (unlinkErr) {
+                            console.error('Error deleting temporary backup file:', unlinkErr);
+                        }
                     }, 5000);
                 });
             })
             .catch(error => {
                 console.error('Error creating backup:', error);
-                return res.status(500).json({ error: 'Error creating backup: ' + error.message });
+                // Check if headers have been sent before sending error response
+                if (!res.headersSent) {
+                    return res.status(500).json({ error: 'Error creating backup: ' + error.message });
+                }
             });
     });
 });
@@ -3793,4 +3800,84 @@ app.get('/api/dashboard-stats', simpleCacheMiddleware, (req, res) => {
   // Your dashboard stats logic here
   // This is just a placeholder
   res.json({ status: 'success', message: 'Stats retrieved' });
+});
+
+// Initialize database for a fresh deployment
+app.post('/api/initialize-database', isAuthenticated, async (req, res) => {
+    try {
+        const username = req.session.username;
+        console.log(`Initializing database for user ${username}`);
+        
+        // Create an appropriate user directory
+        const userDir = path.join(dbBaseDir, username);
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir, { recursive: true });
+        }
+        
+        // Update user_dir in the users table
+        await new Promise((resolve, reject) => {
+            authDb.run('UPDATE users SET user_dir = ? WHERE username = ?', 
+                [userDir, username], 
+                function(err) {
+                    if (err) return reject(err);
+                    resolve();
+                }
+            );
+        });
+        
+        // Get or create current financial year
+        let currentFY = await getCurrentFinancialYear();
+        if (!currentFY) {
+            const now = new Date();
+            const startYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+            const endYear = startYear + 1;
+            
+            const defaultFY = {
+                id: `FY${startYear}-${endYear}`,
+                label: `FY ${startYear}-${endYear}`,
+                start_date: `${startYear}-04-01`,
+                end_date: `${endYear}-03-31`
+            };
+            
+            await new Promise((resolve, reject) => {
+                authDb.run(
+                    'INSERT OR IGNORE INTO financial_years (id, label, start_date, end_date) VALUES (?, ?, ?, ?)',
+                    [defaultFY.id, defaultFY.label, defaultFY.start_date, defaultFY.end_date],
+                    function(err) {
+                        if (err) return reject(err);
+                        console.log('Created default financial year:', defaultFY);
+                        resolve();
+                    }
+                );
+            });
+            
+            currentFY = defaultFY;
+        }
+        
+        // Create user database for this financial year
+        const dbPath = path.join(userDir, `${currentFY.id}.db`);
+        console.log(`Creating user database at: ${dbPath}`);
+        
+        // Check if file already exists
+        if (!fs.existsSync(dbPath)) {
+            const userDb = new sqlite3.Database(dbPath);
+            await initializeFinancialYearDatabaseSchema(userDb);
+            console.log('Financial year database schema initialized');
+            userDb.close();
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Database initialized successfully',
+            userDir,
+            financialYear: currentFY,
+            dbPath
+        });
+    } catch (error) {
+        console.error('Error initializing database:', error);
+        res.status(500).json({ 
+            error: 'Error initializing database', 
+            message: error.message 
+        });
+    }
 });

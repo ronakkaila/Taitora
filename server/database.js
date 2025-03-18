@@ -14,6 +14,24 @@ if (!fs.existsSync(dbBaseDir)) {
     fs.mkdirSync(dbBaseDir, { recursive: true });
 }
 
+// Create sessions directory if it doesn't exist
+const sessionsDir = path.join(__dirname, 'sessions');
+if (!fs.existsSync(sessionsDir)) {
+    fs.mkdirSync(sessionsDir, { recursive: true });
+}
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Create temp_backups directory if it doesn't exist
+const tempBackupsDir = path.join(__dirname, 'temp_backups');
+if (!fs.existsSync(tempBackupsDir)) {
+    fs.mkdirSync(tempBackupsDir, { recursive: true });
+}
+
 // Comment out or remove the mongoose-related code
 // const mongoose = require('mongoose');
 // mongoose.connect(process.env.MONGODB_URI, {
@@ -264,11 +282,12 @@ function getUserDatabase(username, financialYearId = null) {
                 });
             });
 
+            // Get user directory, ensuring it's a path within our base directory
             let userDir = userRow.user_dir;
             
-            // If user directory is null, create it
-            if (!userDir) {
-                console.log(`User directory for ${username} is null, creating it now`);
+            // If user directory is null or absolute path from Windows environment
+            if (!userDir || userDir.includes('\\') || userDir.includes(':')) {
+                console.log(`User directory needs to be updated for ${username}, creating it now`);
                 userDir = path.join(dbBaseDir, username);
                 
                 // Create directory for user
