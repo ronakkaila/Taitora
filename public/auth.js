@@ -10,7 +10,15 @@ async function checkAuth() {
     // If user exists in localStorage, verify with server
     if (user) {
         try {
-            const response = await fetch('/api/user/profile');
+            // Add cache busting parameter to prevent caching issues
+            const response = await fetch('/api/user/profile?t=' + new Date().getTime(), {
+                credentials: 'include', // Important: send cookies for session
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
+            
             if (!response.ok) {
                 console.log('Session expired or invalid, redirecting to login');
                 localStorage.removeItem('user');
@@ -19,6 +27,10 @@ async function checkAuth() {
                 }
                 return false;
             }
+            
+            // Successfully verified - update local storage with latest user data
+            const userData = await response.json();
+            localStorage.setItem('user', JSON.stringify(userData));
             
             // If on login page but authenticated, redirect to dashboard
             if (currentPath === '/' || currentPath === '/index.html' || currentPath === '/signup' || currentPath === '/signup.html') {
@@ -55,10 +67,24 @@ async function checkAuth() {
 }
 
 // Logout function
-function logout() {
-    localStorage.removeItem('user');
-    sessionStorage.clear();
-    window.location.href = '/';
+async function logout() {
+    try {
+        // Call server logout endpoint to invalidate session
+        await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    } catch (error) {
+        console.error('Error during logout:', error);
+    } finally {
+        // Always clear local storage even if server call fails
+        localStorage.removeItem('user');
+        sessionStorage.clear();
+        window.location.href = '/';
+    }
 }
 
 // Run authentication check when page loads

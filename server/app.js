@@ -15,17 +15,35 @@ const multer = require('multer');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 const sqlite3 = require('sqlite3').verbose();
 const { getFinancialYearTransactions, getFinancialYearSummary } = require('./financialReports');
+const rateLimit = require('express-rate-limit');
+
+// Load environment variables
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Add rate limiting
+const apiLimiter = rateLimit({
+    windowMs: (parseInt(process.env.RATE_LIMIT_WINDOW) || 15) * 60 * 1000, // Default 15 minutes in milliseconds
+    max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // Default limit each IP to 100 requests per windowMs
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: 'Too many requests from this IP, please try again later'
+});
+
+// Apply rate limiter to all API endpoints
+app.use('/api/', apiLimiter);
+
 // Email configuration
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: process.env.EMAIL_SERVICE || 'gmail',
     auth: {
-        user: 'patidargastraders@gmail.com',
-        pass: 'ccnrupzgdmyvwzmr'
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
     }
 });
 
@@ -41,10 +59,11 @@ const storage = multer.diskStorage({
             cb(null, userDir);
         } else {
             // Fallback to uploads directory
-            if (!fs.existsSync('./uploads')) {
-                fs.mkdirSync('./uploads', { recursive: true });
+            const uploadDir = process.env.UPLOAD_DIR || './uploads';
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
             }
-            cb(null, './uploads');
+            cb(null, uploadDir);
         }
     },
     filename: function (req, file, cb) {
@@ -55,8 +74,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Create uploads directory if it doesn't exist
-if (!fs.existsSync('./uploads')) {
-    fs.mkdirSync('./uploads', { recursive: true });
+const uploadDir = process.env.UPLOAD_DIR || './uploads';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Add debugging logs
@@ -66,15 +86,27 @@ console.log('Starting application...');
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 
+// Create sessions directory if it doesn't exist
+const sessionsDir = path.join(__dirname, 'sessions');
+if (!fs.existsSync(sessionsDir)) {
+    fs.mkdirSync(sessionsDir, { recursive: true });
+}
+
 // Session management
 app.use(session({
-    secret: 'your-session-secret',
-    resave: false,
-    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'your-session-secret',
+    resave: true,
+    saveUninitialized: true,
     cookie: { 
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 30 * 60 * 1000 // 30 minutes
-    }
+        secure: process.env.NODE_ENV === 'production' && process.env.SECURE_COOKIE === 'true',
+        maxAge: parseInt(process.env.SESSION_DURATION) || 30 * 60 * 1000, // Default: 30 minutes
+        httpOnly: true
+    },
+    store: process.env.NODE_ENV === 'production' ? 
+        new SQLiteStore({
+            dir: sessionsDir,
+            db: 'sessions.db'
+        }) : undefined
 }));
 
 // Add request logging middleware
@@ -2355,7 +2387,7 @@ app.get('/api/backup', isAuthenticated, (req, res) => {
         
         const userDir = row.user_dir;
         const fileName = `backup_${username}_${new Date().toISOString().split('T')[0]}.db`;
-        const backupPath = path.join(__dirname, 'temp_backups');
+        const backupPath = process.env.BACKUP_DIR || path.join(__dirname, 'temp_backups');
 
         // Create temp directory if it doesn't exist
         if (!fs.existsSync(backupPath)) {

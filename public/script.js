@@ -163,6 +163,7 @@ async function handleLogin(event) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
+            credentials: 'include', // Important: include cookies for session
             body: JSON.stringify({
                 username,
                 password
@@ -175,8 +176,16 @@ async function handleLogin(event) {
             // Store user data in localStorage
             localStorage.setItem('user', JSON.stringify(data.user));
             
+            // Get CSRF token if any
+            const csrfToken = data.csrfToken;
+            if (csrfToken) {
+                localStorage.setItem('csrfToken', csrfToken);
+            }
+            
+            console.log('Login successful, redirecting to dashboard...');
+            
             // Redirect to user dashboard
-            window.location.href = '/pages/user-dashboard.html';
+            window.location.href = data.redirectTo || '/pages/user-dashboard.html';
         } else {
             // Show error message
             errorMessageElement.textContent = data.error || 'Invalid username or password.';

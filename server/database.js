@@ -3,8 +3,13 @@ const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 // const mongoose = require('mongoose');
 
+// Load environment variables if not already loaded
+if (!process.env.DB_BASE_DIR) {
+    require('dotenv').config();
+}
+
 // Ensure database directories exist
-const dbBaseDir = path.join(__dirname, 'user_databases');
+const dbBaseDir = process.env.DB_BASE_DIR || path.join(__dirname, 'user_databases');
 if (!fs.existsSync(dbBaseDir)) {
     fs.mkdirSync(dbBaseDir, { recursive: true });
 }
@@ -65,7 +70,7 @@ function ensureColumnsExist(db, tableName, columnDefinitions) {
 }
 
 // Create a shared database for user authentication
-const authDbPath = path.join(__dirname, 'auth.db');
+const authDbPath = process.env.AUTH_DB_PATH || path.join(__dirname, 'auth.db');
 console.log('Initializing auth database:', authDbPath);
 
 const authDb = new sqlite3.Database(authDbPath, (err) => {
